@@ -1,0 +1,29 @@
+services:
+  dynamic-dca:
+    build: .
+    container_name: dynamic-dca
+    restart: unless-stopped
+    environment:
+      - CRON_SCHEDULE=${CRON_SCHEDULE}
+      - TZ=${TZ:-UTC}
+      - DATA_DIR=/data
+      - BASE_ORDER_SIZE=${BASE_ORDER_SIZE}
+      - MAX_MULTIPLICATOR=${MAX_MULTIPLICATOR}
+      - KRAKEN_API_KEY=${KRAKEN_API_KEY}
+      - KRAKEN_PRIVATE_KEY=${KRAKEN_PRIVATE_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    volumes:
+      - ${DATA_VOLUME_PATH:-./data}:/data
+      - ${LOGS_VOLUME_PATH:-./logs}:/logs
+    healthcheck:
+      test: ["CMD", "pgrep", "cron"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# Optional: Create a named volume instead of bind mount
+# volumes:
+#   dca_data:
+#     driver: local

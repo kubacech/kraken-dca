@@ -1,0 +1,7 @@
+# Dynamic DCA Strategy Cron Job
+# Schedule: {{CRON_SCHEDULE}}
+# Data Directory: {{DATA_DIR}}
+
+{{CRON_SCHEDULE}} cd /app && DATA_DIR={{DATA_DIR}} LOGS_DIR={{LOGS_DIR}} python main.py >> /var/log/cron.log 2>&1
+
+# Empty line required at end of crontab
