@@ -3,7 +3,7 @@ services:
     build: .
     container_name: dynamic-dca
     restart: unless-stopped
-    command: python3 scheduler.py
+    command: python3 /app/scheduler.py
     environment:
       - CRON_SCHEDULE=${CRON_SCHEDULE}
       - TZ=${TZ:-UTC}

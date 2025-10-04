@@ -19,4 +19,4 @@ RUN mkdir -p /data /logs
 
 VOLUME ["/data", "/logs"]
 
-CMD ["python3", "scheduler.py"]
+CMD ["python3", "/app/scheduler.py"]
