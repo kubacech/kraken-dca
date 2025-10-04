@@ -11,8 +11,13 @@ MAKER_FEE_OFFSET = 0.0005  # 0.05% under current price for maker fee
 
 # File paths - use absolute paths relative to project root
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.getenv("DATA_DIR", os.path.join(_PROJECT_ROOT, "data"))
-LOGS_DIR = os.getenv("LOGS_DIR", os.path.join(_PROJECT_ROOT, "logs"))
+
+# Get environment variables with fallbacks, handling empty strings
+_data_dir = os.getenv("DATA_DIR", "")
+_logs_dir = os.getenv("LOGS_DIR", "")
+
+DATA_DIR = _data_dir if _data_dir else os.path.join(_PROJECT_ROOT, "data")
+LOGS_DIR = _logs_dir if _logs_dir else os.path.join(_PROJECT_ROOT, "logs")
 ATH_FILE = os.path.join(DATA_DIR, "ath_price.txt")
 LOG_FILE = os.path.join(DATA_DIR, "dca_log.csv")
 CUMULATIVE_FILE = os.path.join(DATA_DIR, "cumulative_data.txt")

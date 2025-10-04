@@ -8,6 +8,7 @@ services:
       - CRON_SCHEDULE=${CRON_SCHEDULE}
       - TZ=${TZ:-UTC}
       - DATA_DIR=/data
+      - LOGS_DIR=/logs
       - BASE_ORDER_SIZE=${BASE_ORDER_SIZE}
       - MAX_MULTIPLICATOR=${MAX_MULTIPLICATOR}
       - KRAKEN_API_KEY=${KRAKEN_API_KEY}
