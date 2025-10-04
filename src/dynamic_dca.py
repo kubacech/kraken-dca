@@ -9,12 +9,12 @@ import logging
 from datetime import datetime
 from typing import Dict, Optional, Tuple
 
-from .config import *
-from .kraken import KrakenClient
-from .telegram import TelegramNotifier
+from config import *
+from kraken import KrakenClient
+from telegram import TelegramNotifier
 
 # Setup logging
-from .config import LOGS_DIR
+from config import LOGS_DIR
 log_file = os.path.join(LOGS_DIR, "dca_strategy.log")
 
 # Ensure directories exist
