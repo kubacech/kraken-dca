@@ -13,7 +13,7 @@ fi
 echo "Setting up cron job with schedule: $CRON_SCHEDULE"
 
 # Replace placeholders in crontab template
-sed "s|{{CRON_SCHEDULE}}|$CRON_SCHEDULE|g; s|{{DATA_DIR}}|$DATA_DIR|g; s|{{LOGS_DIR}}|$LOGS_DIR|g" /app/crontab.template > /tmp/crontab
+sed "s|{{CRON_SCHEDULE}}|$CRON_SCHEDULE|g; s|{{DATA_DIR}}|$DATA_DIR|g; s|{{LOGS_DIR}}|$LOGS_DIR|g; s|{{BASE_ORDER_SIZE}}|$BASE_ORDER_SIZE|g; s|{{MAX_MULTIPLICATOR}}|$MAX_MULTIPLICATOR|g; s|{{KRAKEN_API_KEY}}|$KRAKEN_API_KEY|g; s|{{KRAKEN_PRIVATE_KEY}}|$KRAKEN_PRIVATE_KEY|g; s|{{TELEGRAM_BOT_TOKEN}}|$TELEGRAM_BOT_TOKEN|g; s|{{TELEGRAM_CHAT_ID}}|$TELEGRAM_CHAT_ID|g" /app/crontab.template > /tmp/crontab
 
 # Install the cron job
 crontab /tmp/crontab
