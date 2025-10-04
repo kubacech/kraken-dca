@@ -30,7 +30,7 @@ A Python script that implements a dynamic Dollar Cost Averaging (DCA) strategy f
    ```bash
    cd dynamic-dca
    pip install -r requirements.txt
-   python setup.py
+   python src/setup.py
    ```
 
 2. **Configure API credentials** in `src/config.py`:
@@ -66,7 +66,7 @@ cp env.example .env
 # Edit .env with your API keys and schedule
 
 # Run the scheduler
-python3 scheduler.py
+python3 src/scheduler.py
 ```
 
 The scheduler will:
@@ -165,21 +165,18 @@ dynamic-dca/
 │   ├── __init__.py        # Package initialization
 │   ├── config.py          # Configuration settings
 │   ├── dynamic_dca.py     # Main strategy implementation
-│   └── test_strategy.py   # Test suite
+│   ├── scheduler.py       # Python scheduler (replaces cron)
+│   └── setup.py           # Initial setup script
 ├── data/                  # Data files (persistent)
 │   ├── ath_price.txt      # All-time high price
 │   ├── cumulative_data.txt # Investment tracking
 │   └── dca_log.csv        # Execution history
 ├── logs/                  # Log files
 │   └── dca_strategy.log   # Application logs
-├── main.py               # Main entry point
-├── scheduler.py          # Python scheduler (replaces cron)
-├── test.py               # Test runner
-├── setup.py              # Initial setup script
-├── requirements.txt      # Python dependencies
-├── Dockerfile            # Docker configuration
-├── docker-compose.yml    # Docker Compose setup
-└── README.md             # This file
+├── requirements.txt       # Python dependencies
+├── Dockerfile             # Docker configuration
+├── docker-compose.yml     # Docker Compose setup
+└── README.md              # This file
 ```
 
 ## Files Generated

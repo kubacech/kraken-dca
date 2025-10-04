@@ -11,12 +11,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ ./src/
-COPY main.py .
-COPY setup.py .
-COPY scheduler.py .
 
 RUN mkdir -p /data /logs
 
 VOLUME ["/data", "/logs"]
 
-CMD ["python3", "/app/scheduler.py"]
+CMD ["python3", "/app/src/scheduler.py"]

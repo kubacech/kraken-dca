@@ -3,7 +3,7 @@ services:
     build: .
     container_name: dynamic-dca
     restart: unless-stopped
-    command: python3 /app/scheduler.py
+    command: python3 /app/src/scheduler.py
     environment:
       - CRON_SCHEDULE=${CRON_SCHEDULE}
       - TZ=${TZ:-UTC}
@@ -19,7 +19,7 @@ services:
       - ${DATA_VOLUME_PATH:-./data}:/data
       - ${LOGS_VOLUME_PATH:-./logs}:/logs
     healthcheck:
-      test: ["CMD", "pgrep", "-f", "scheduler.py"]
+      test: ["CMD", "pgrep", "-f", "src/scheduler.py"]
       interval: 30s
       timeout: 10s
       retries: 3

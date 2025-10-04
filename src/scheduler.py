@@ -12,9 +12,9 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.dirname(__file__))
 
-from src.dynamic_dca import main as run_dca
+from dynamic_dca import main as run_dca
 
 # Load environment variables
 load_dotenv()

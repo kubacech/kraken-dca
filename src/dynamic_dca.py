@@ -5,15 +5,13 @@ Dynamic DCA Strategy for Bitcoin using Kraken API
 import os
 import csv
 import json
-import time
 import logging
 from datetime import datetime
 from typing import Dict, Optional, Tuple
 
-import krakenex
-import requests
-
 from .config import *
+from .kraken import KrakenClient
+from .telegram import TelegramNotifier
 
 # Setup logging
 from .config import LOGS_DIR
@@ -35,19 +33,17 @@ logger = logging.getLogger(__name__)
 
 class DynamicDCAStrategy:
     def __init__(self):
-        self.kraken = krakenex.API()
-        self.kraken.key = KRAKEN_API_KEY
-        self.kraken.secret = KRAKEN_PRIVATE_KEY
+        self.kraken_client = KrakenClient(KRAKEN_API_KEY, KRAKEN_PRIVATE_KEY)
+        self.telegram_notifier = None
+        
+        # Initialize Telegram notifier if enabled
+        if NOTIFICATION_ENABLED and NOTIFICATION_METHOD == "telegram":
+            self.telegram_notifier = TelegramNotifier(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)
         
     def get_current_btc_price(self) -> float:
         """Get current BTC/EUR price from Kraken"""
         try:
-            ticker_data = self.kraken.query_public('Ticker', {'pair': TRADING_PAIR})
-            if ticker_data['error']:
-                raise Exception(f"Kraken API error: {ticker_data['error']}")
-            
-            # Get the current price (last trade price)
-            price = float(ticker_data['result'][TRADING_PAIR]['c'][0])
+            price = self.kraken_client.get_ticker_price(TRADING_PAIR)
             logger.info(f"Current BTC/EUR price: {price}")
             return price
             
@@ -151,24 +147,17 @@ class DynamicDCAStrategy:
             
             logger.info(f"Placing order: {btc_volume:.8f} BTC at {order_price:.1f} EUR")
             
-            order_data = {
-                'pair': TRADING_PAIR,
-                'type': 'buy',
-                'ordertype': 'limit',
-                'volume': f"{btc_volume:.8f}",
-                'price': f"{order_price:.1f}",
-                'validate': 'false'  # Set to 'true' for testing without actual order
-            }
-            
-            # Place actual order
-            result = self.kraken.query_private('AddOrder', order_data)
-            if result['error']:
-                raise Exception(f"Order placement error: {result['error']}")
-            
-            logger.info(f"Order placed successfully: {result['result']}")
+            # Place actual order via Kraken client
+            result = self.kraken_client.place_limit_order(
+                trading_pair=TRADING_PAIR,
+                order_type='buy',
+                volume=btc_volume,
+                price=order_price,
+                validate=False  # Set to True for testing without actual order
+            )
             
             return {
-                'order_id': result['result']['txid'][0] if result['result']['txid'] else None,
+                'order_id': result['order_id'],
                 'btc_volume': btc_volume,
                 'order_price': order_price,
                 'order_size': order_size
@@ -229,31 +218,13 @@ class DynamicDCAStrategy:
             return
             
         try:
-            if NOTIFICATION_METHOD == "telegram":
-                self.send_telegram_notification(message)
+            if self.telegram_notifier:
+                self.telegram_notifier.send_message(message)
             else:
-                logger.info(f"Notification method '{NOTIFICATION_METHOD}' not implemented yet")
+                logger.info(f"Notification method '{NOTIFICATION_METHOD}' not configured or not implemented")
                 
         except Exception as e:
             logger.error(f"Error sending notification: {e}")
-    
-    def send_telegram_notification(self, message: str) -> None:
-        """Send notification via Telegram"""
-        try:
-            url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-            data = {
-                'chat_id': TELEGRAM_CHAT_ID,
-                'text': message,
-                'parse_mode': 'HTML'
-            }
-            
-            response = requests.post(url, data=data, timeout=10)
-            response.raise_for_status()
-            
-            logger.info("Telegram notification sent successfully")
-            
-        except Exception as e:
-            logger.error(f"Error sending Telegram notification: {e}")
     
     def execute_strategy(self) -> None:
         """Execute the complete DCA strategy"""
