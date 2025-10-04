@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+echo "Starting Dynamic DCA entrypoint script..."
+echo "Current working directory: $(pwd)"
+echo "Available files in /app:"
+ls -la /app/
+
 if [ ! -z "$TZ" ]; then
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 fi

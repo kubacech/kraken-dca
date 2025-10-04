@@ -20,11 +20,11 @@ COPY setup.py .
 
 RUN mkdir -p /data /logs
 
-COPY docker-entrypoint.sh .
-RUN chmod +x docker-entrypoint.sh
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 COPY crontab.template .
 
 VOLUME ["/data", "/logs"]
 
-CMD ["/bin/bash", "/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/app/docker-entrypoint.sh"]
