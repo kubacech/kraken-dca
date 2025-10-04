@@ -27,4 +27,4 @@ COPY crontab.template .
 
 VOLUME ["/data", "/logs"]
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["/bin/bash", "/app/docker-entrypoint.sh"]

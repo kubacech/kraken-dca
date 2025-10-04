@@ -30,6 +30,7 @@ coverage.xml
 
 # Data files (these should be in volumes)
 *.txt
+!requirements.txt
 *.csv
 *.log
 data/
