@@ -7,8 +7,7 @@ ENV TZ="UTC"
 
 RUN apt-get update && apt-get install -y \
     cron \
-    && rm -rf /var/lib/apt/lists/* \
-    && if [ ! -L /usr/local/bin/python ]; then ln -s /usr/local/bin/python3 /usr/local/bin/python; fi
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

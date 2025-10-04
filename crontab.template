@@ -2,6 +2,6 @@
 # Schedule: {{CRON_SCHEDULE}}
 # Data Directory: {{DATA_DIR}}
 
-{{CRON_SCHEDULE}} cd /app && DATA_DIR={{DATA_DIR}} LOGS_DIR={{LOGS_DIR}} python3 main.py >> /var/log/cron.log 2>&1
+{{CRON_SCHEDULE}} cd /app && DATA_DIR={{DATA_DIR}} LOGS_DIR={{LOGS_DIR}} /usr/local/bin/python3 main.py >> /var/log/cron.log 2>&1
 
 # Empty line required at end of crontab
