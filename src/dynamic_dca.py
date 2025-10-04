@@ -149,14 +149,14 @@ class DynamicDCAStrategy:
             # Calculate BTC volume to buy
             btc_volume = order_size / order_price
             
-            logger.info(f"Placing order: {btc_volume:.8f} BTC at {order_price:.2f} EUR")
+            logger.info(f"Placing order: {btc_volume:.8f} BTC at {order_price:.1f} EUR")
             
             order_data = {
                 'pair': TRADING_PAIR,
                 'type': 'buy',
                 'ordertype': 'limit',
                 'volume': f"{btc_volume:.8f}",
-                'price': f"{order_price:.2f}",
+                'price': f"{order_price:.1f}",
                 'validate': 'false'  # Set to 'true' for testing without actual order
             }
             
