@@ -5,10 +5,6 @@ ENV DATA_DIR="/data"
 ENV LOGS_DIR="/logs"
 ENV TZ="UTC"
 
-RUN apt-get update && apt-get install -y \
-    cron \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
 COPY requirements.txt .
@@ -17,15 +13,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY main.py .
 COPY setup.py .
+COPY scheduler.py .
 
 RUN mkdir -p /data /logs
 
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN chmod +x /app/docker-entrypoint.sh && \
-    ls -la /app/docker-entrypoint.sh
-
-COPY crontab.template .
-
 VOLUME ["/data", "/logs"]
 
-CMD ["/app/docker-entrypoint.sh"]
+CMD ["python3", "scheduler.py"]

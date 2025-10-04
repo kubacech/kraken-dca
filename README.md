@@ -56,9 +56,55 @@ Key parameters in `src/config.py`:
 
 ## Usage
 
-### Docker Deployment (Recommended)
+### Standalone Python Scheduler (Recommended for Local Setup)
 
-The easiest way to run this strategy is using Docker with automated cron scheduling.
+Run the scheduler directly with Python - no Docker or cron needed:
+
+```bash
+# Set environment variables in .env file
+cp env.example .env
+# Edit .env with your API keys and schedule
+
+# Run the scheduler
+python3 scheduler.py
+```
+
+The scheduler will:
+- Read your `CRON_SCHEDULE` from the `.env` file
+- Run the DCA strategy automatically at scheduled times
+- Log all activities to both console and `logs/scheduler.log`
+- Continue running indefinitely until stopped (Ctrl+C)
+
+**Example schedules:**
+- `0 1 * * *` - Daily at 1:00 AM
+- `0 */6 * * *` - Every 6 hours
+- `30 9,21 * * *` - Twice daily at 9:30 AM and 9:30 PM
+
+**Running as a system service (optional):**
+
+To run the scheduler as a systemd service that starts automatically on boot:
+
+```bash
+# Edit the service file with your paths
+nano dynamic-dca.service
+
+# Copy to systemd directory
+sudo cp dynamic-dca.service /etc/systemd/system/
+
+# Enable and start the service
+sudo systemctl enable dynamic-dca
+sudo systemctl start dynamic-dca
+
+# Check status
+sudo systemctl status dynamic-dca
+
+# View logs
+sudo journalctl -u dynamic-dca -f
+```
+
+### Docker Deployment (Recommended for Production)
+
+The easiest way to run this strategy is using Docker with automated Python-based scheduling.
 
 #### Quick Start
 
@@ -100,8 +146,8 @@ The easiest way to run this strategy is using Docker with automated cron schedul
 All data files (ATH, logs, cumulative data) are stored in the `./data` directory and persist across container restarts.
 
 **Environment Variables:**
-- `CRON_SCHEDULE` - Cron expression for execution schedule
-- `TZ` - Timezone for cron execution
+- `CRON_SCHEDULE` - Cron expression for execution schedule (e.g., "0 1 * * *" for daily at 1 AM)
+- `TZ` - Timezone for scheduler execution
 - `DATA_VOLUME_PATH` - Local directory for data persistence
 - `BASE_ORDER_SIZE` - Base order size in EUR
 - `MAX_MULTIPLICATOR` - Maximum order size multiplier
@@ -127,6 +173,7 @@ dynamic-dca/
 ├── logs/                  # Log files
 │   └── dca_strategy.log   # Application logs
 ├── main.py               # Main entry point
+├── scheduler.py          # Python scheduler (replaces cron)
 ├── test.py               # Test runner
 ├── setup.py              # Initial setup script
 ├── requirements.txt      # Python dependencies
