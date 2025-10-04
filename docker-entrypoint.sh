@@ -4,7 +4,7 @@ set -e
 echo "Starting Dynamic DCA entrypoint script..."
 echo "Current working directory: $(pwd)"
 echo "Available files in /app:"
-ls -la /app/
+ls -la /app/ || echo "Failed to list /app directory"
 
 if [ ! -z "$TZ" ]; then
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone

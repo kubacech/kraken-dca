@@ -3,6 +3,7 @@ services:
     build: .
     container_name: dynamic-dca
     restart: unless-stopped
+    command: /app/docker-entrypoint.sh
     environment:
       - CRON_SCHEDULE=${CRON_SCHEDULE}
       - TZ=${TZ:-UTC}
