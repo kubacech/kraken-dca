@@ -86,9 +86,10 @@ class DynamicDCAStrategy:
         percent_diff = (ath_price - current_price) / ath_price
         logger.info(f"Percentage diff from ATH: {percent_diff:.4f} ({percent_diff*100:.2f}%)")
         
-        # Calculate multiplicator: 1 + ((MAX_MULT - 1) / 0.75) * %DIFF
-        # This means at 75% drop from ATH, we get maximum multiplicator
-        multiplicator = 1 + ((MAX_MULTIPLICATOR - 1) / 0.75) * percent_diff
+        # Calculate multiplicator using quadratic exponential function: 1 + (MAX_MULT - 1) * ((%DIFF / 0.75) ** 2)
+        # This provides slower growth near ATH and accelerates quadratically as price drops further
+        # At 75% drop from ATH, we reach maximum multiplicator
+        multiplicator = 1 + (MAX_MULTIPLICATOR - 1) * ((percent_diff / 0.75) ** 2)
         
         # Ensure multiplicator is between 1 and MAX_MULTIPLICATOR
         multiplicator = max(1.0, min(MAX_MULTIPLICATOR, multiplicator))
