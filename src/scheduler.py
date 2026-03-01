@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Simple Python scheduler for Dynamic DCA Strategy
-Replaces cron with a pure Python solution using the schedule library.
+Simple Python scheduler for DCA Strategy
+Replaces cron with a pure Python solution.
 """
 
 import os
@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 sys.path.insert(0, os.path.dirname(__file__))
 
 from dca import main as run_dca
+from config import DCA_MODE, BASE_ORDER_SIZE, MAX_MULTIPLICATOR, FIXED_FIAT_AMOUNT
 
 # Load environment variables
 load_dotenv()
@@ -134,13 +135,13 @@ def run_dca_with_error_handling():
     """Wrapper to run DCA with error handling and logging."""
     try:
         logger.info("=" * 60)
-        logger.info("Starting Dynamic DCA Strategy execution")
+        logger.info(f"Starting DCA execution (strategy: {DCA_MODE})")
         logger.info("=" * 60)
         
         run_dca()
         
         logger.info("=" * 60)
-        logger.info("Dynamic DCA Strategy execution completed successfully")
+        logger.info("DCA execution completed successfully")
         logger.info("=" * 60)
         
     except Exception as e:
@@ -156,12 +157,16 @@ def main():
     cron_schedule = os.getenv("CRON_SCHEDULE", "0 1 * * *")
     
     logger.info("=" * 60)
-    logger.info("Dynamic DCA Scheduler Started")
+    logger.info("DCA Scheduler Started")
     logger.info("=" * 60)
+    logger.info(f"Strategy: {DCA_MODE}")
+    if DCA_MODE == "fixed-fiat":
+        logger.info(f"Fixed Fiat Amount: {FIXED_FIAT_AMOUNT} EUR")
+    else:
+        logger.info(f"Base Order Size: {BASE_ORDER_SIZE} EUR")
+        logger.info(f"Max Multiplicator: {MAX_MULTIPLICATOR}")
     logger.info(f"Schedule: {parse_cron_schedule(cron_schedule)}")
     logger.info(f"Timezone: {os.getenv('TZ', 'system default')}")
-    logger.info(f"Base Order Size: {os.getenv('BASE_ORDER_SIZE', '5.0')} EUR")
-    logger.info(f"Max Multiplicator: {os.getenv('MAX_MULTIPLICATOR', '5.0')}")
     logger.info("=" * 60)
     
     # Validate schedule
