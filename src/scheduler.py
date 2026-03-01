@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 # Add src to path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from dynamic_dca import main as run_dca
+from dca import main as run_dca
 
 # Load environment variables
 load_dotenv()
@@ -49,21 +49,7 @@ def parse_cron_schedule(cron_string):
         raise ValueError(f"Invalid cron format: {cron_string}. Expected 5 parts (minute hour day month weekday)")
     
     minute, hour, day, month, weekday = parts
-    
-    # Build description
-    desc_parts = []
-    
-    # Handle minutes
-    if minute == "0":
-        minute_desc = "at the start of the hour"
-    elif minute == "*":
-        minute_desc = "every minute"
-    elif "/" in minute:
-        interval = minute.split("/")[1]
-        minute_desc = f"every {interval} minutes"
-    else:
-        minute_desc = f"at minute {minute}"
-    
+
     # Handle hours
     if hour == "*":
         hour_desc = "every hour"
@@ -96,8 +82,7 @@ def calculate_next_run(cron_string):
     if hour.startswith("*/"):
         # Every X hours
         interval_hours = int(hour.split("/")[1])
-        interval_seconds = interval_hours * 3600
-        
+
         # Calculate next run
         current_hour = now.hour
         hours_since_midnight = current_hour
@@ -122,8 +107,7 @@ def calculate_next_run(cron_string):
     elif minute.startswith("*/"):
         # Every X minutes
         interval_minutes = int(minute.split("/")[1])
-        interval_seconds = interval_minutes * 60
-        
+
         # Calculate seconds since last interval
         minutes_now = now.minute
         seconds_since_start = (minutes_now % interval_minutes) * 60 + now.second

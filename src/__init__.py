@@ -1,8 +1,8 @@
 """
-Dynamic DCA Strategy Package
+DCA Strategy Package
 """
-from .dynamic_dca import DynamicDCAStrategy
-from .config import *
+from .strategy_dynamic import DynamicStrategy
+from .strategy_fixed_fiat import FixedFiatStrategy
 
-__version__ = "1.0.0"
-__all__ = ["DynamicDCAStrategy"]
+__version__ = "1.1.0"
+__all__ = ["DynamicStrategy", "FixedFiatStrategy"]

@@ -3,7 +3,7 @@
 Kraken API client handler
 """
 import logging
-from typing import Dict, Optional
+from typing import Dict
 
 import krakenex
 

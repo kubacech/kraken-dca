@@ -9,6 +9,8 @@ services:
       - TZ=${TZ:-UTC}
       - DATA_DIR=/data
       - LOGS_DIR=/logs
+      - DCA_MODE=${DCA_MODE:-dynamic}
+      - FIXED_FIAT_AMOUNT=${FIXED_FIAT_AMOUNT:-8.0}
       - BASE_ORDER_SIZE=${BASE_ORDER_SIZE}
       - MAX_MULTIPLICATOR=${MAX_MULTIPLICATOR}
       - KRAKEN_API_KEY=${KRAKEN_API_KEY}

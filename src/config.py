@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Trading Configuration
+DCA_MODE = os.getenv("DCA_MODE", "dynamic")  # "dynamic" or "fixed-fiat"
+FIXED_FIAT_AMOUNT = float(os.getenv("FIXED_FIAT_AMOUNT", "8.0"))  # EUR, used in fixed-fiat mode
 BASE_ORDER_SIZE = float(os.getenv("BASE_ORDER_SIZE", "5.0"))  # EUR
 MAX_MULTIPLICATOR = float(os.getenv("MAX_MULTIPLICATOR", "5.0"))
 TRADING_PAIR = "XXBTZEUR"  # Kraken's BTC/EUR pair

@@ -1,189 +1,89 @@
-# Dynamic DCA Strategy for Bitcoin
+# Kraken DCA Bot
 
-A Python script that implements a dynamic Dollar Cost Averaging (DCA) strategy for Bitcoin using the Kraken API. The strategy adjusts order sizes based on the current price's distance from the All-Time High (ATH).
+Bitcoin Dollar Cost Averaging bot for the [Kraken](https://www.kraken.com/) exchange. Automatically places recurring limit buy orders on a cron schedule with optional Telegram notifications.
 
-## Features
+## Modes
 
-- **Dynamic Order Sizing**: Order size increases as Bitcoin price drops from ATH
-- **Kraken API Integration**: Fetches real-time prices and places orders
-- **ATH Tracking**: Automatically updates ATH when price reaches new highs
-- **Maker Fee Optimization**: Places orders slightly below market price for maker fees
-- **Comprehensive Logging**: CSV logging with cumulative investment tracking
-- **Notification System**: Get notified of each execution via Telegram
-- **Persistent State**: Maintains ATH and cumulative data across runs
+- **Dynamic** — Order size scales with distance from all-time high (ATH). The further BTC is from ATH, the more you buy. Uses a quadratic formula capped at a configurable maximum multiplier.
+- **Fixed-fiat** — Buys a constant EUR amount every execution.
 
-## How It Works
-
-1. **Price Fetching**: Gets current BTC/EUR price from Kraken
-2. **ATH Management**: Compares with stored ATH and updates if higher
-3. **Multiplicator Calculation**: 
-   - `%diff = (ATH - Current) / ATH`
-   - `multiplicator = 1 + ((MAX_MULT - 1) / 0.75) * %diff`
-   - Maximum multiplicator (5x) is reached at 75% drop from ATH
-4. **Order Sizing**: `order_size = BASE_ORDER_SIZE * multiplicator`
-5. **Order Placement**: Places limit order 0.05% below current price
-6. **Logging**: Records all parameters and cumulative data to CSV
-
-## Installation
-
-1. **Clone and setup**:
-   ```bash
-   cd dynamic-dca
-   pip install -r requirements.txt
-   python src/setup.py
-   ```
-
-2. **Configure API credentials** in `src/config.py`:
-   ```python
-   KRAKEN_API_KEY = "your_api_key_here"
-   KRAKEN_PRIVATE_KEY = "your_private_key_here"
-   ```
-
-3. **Configure notifications** (optional):
-   ```python
-   TELEGRAM_BOT_TOKEN = "your_bot_token"
-   TELEGRAM_CHAT_ID = "your_chat_id"
-   ```
-
-## Configuration
-
-Key parameters in `src/config.py`:
-
-- `BASE_ORDER_SIZE = 5.0` - Base order size in EUR
-- `MAX_MULTIPLICATOR = 5.0` - Maximum order size multiplier
-- `MAKER_FEE_OFFSET = 0.0005` - 0.05% below market price
-- `TRADING_PAIR = "XBTEUR"` - Kraken's BTC/EUR pair
-
-## Usage
-
-### Standalone Python Scheduler (Recommended for Local Setup)
-
-Run the scheduler directly with Python - no Docker or cron needed:
+## Quick Start
 
 ```bash
-# Set environment variables in .env file
-cp env.example .env
-# Edit .env with your API keys and schedule
+cp env.example .env   # fill in your API keys and preferences
+docker-compose up -d
+docker-compose logs -f
+```
 
-# Run the scheduler
+Or run locally:
+
+```bash
+pip install -r requirements.txt
 python3 src/scheduler.py
 ```
 
-The scheduler will:
-- Read your `CRON_SCHEDULE` from the `.env` file
-- Run the DCA strategy automatically at scheduled times
-- Log all activities to both console and `logs/scheduler.log`
-- Continue running indefinitely until stopped (Ctrl+C)
+## Configuration
 
-**Example schedules:**
-- `0 1 * * *` - Daily at 1:00 AM
-- `0 */6 * * *` - Every 6 hours
-- `30 9,21 * * *` - Twice daily at 9:30 AM and 9:30 PM
+All settings are via environment variables (see [`env.example`](env.example) for full details):
 
-**Running as a system service (optional):**
+| Variable | Default | Description |
+|---|---|---|
+| `DCA_MODE` | `dynamic` | `dynamic` or `fixed-fiat` |
+| `CRON_SCHEDULE` | `0 1 * * *` | Cron expression for execution schedule |
+| `TZ` | `UTC` | Timezone |
+| `BASE_ORDER_SIZE` | `5.0` | Base order in EUR (dynamic mode) |
+| `MAX_MULTIPLICATOR` | `5.0` | Max multiplier at 75% ATH drop (dynamic mode) |
+| `FIXED_FIAT_AMOUNT` | `8.0` | Fixed buy amount in EUR (fixed-fiat mode) |
+| `KRAKEN_API_KEY` | — | Kraken API key (required) |
+| `KRAKEN_PRIVATE_KEY` | — | Kraken private key (required) |
+| `TELEGRAM_BOT_TOKEN` | — | Telegram bot token (optional) |
+| `TELEGRAM_CHAT_ID` | — | Telegram chat ID (optional) |
+| `DATA_VOLUME_PATH` | `./data` | Persistent data directory |
 
-To run the scheduler as a systemd service that starts automatically on boot:
+### Kraken API Permissions
+
+Your API key needs: **Query Funds**, **Create & Modify Orders**, **Query Open/Closed Orders**.
+
+## How It Works
+
+1. The scheduler runs on the configured cron schedule
+2. Fetches the current BTC/EUR price from Kraken
+3. Calculates order size based on the active strategy
+4. Places a limit buy order 0.05% below market price (to get maker fees)
+5. Logs the execution to CSV and sends a Telegram notification
+
+### Dynamic Multiplier
+
+The dynamic strategy increases buy size as BTC drops from its ATH:
+
+```
+multiplier = 1 + (MAX_MULT - 1) * ((percent_diff / 0.75) ^ 2)
+```
+
+- At ATH: multiplier = 1.0x (base order)
+- At 75% drop: multiplier = MAX_MULTIPLICATOR
+
+## Persistent State
+
+Stored in the `data/` directory:
+
+- `ath_price.txt` — Tracked all-time high (dynamic mode)
+- `cumulative_data.txt` — Total investment and BTC accumulated
+- `dca_log.csv` — Execution history
+
+## Tests
 
 ```bash
-# Edit the service file with your paths
-nano dynamic-dca.service
-
-# Copy to systemd directory
-sudo cp dynamic-dca.service /etc/systemd/system/
-
-# Enable and start the service
-sudo systemctl enable dynamic-dca
-sudo systemctl start dynamic-dca
-
-# Check status
-sudo systemctl status dynamic-dca
-
-# View logs
-sudo journalctl -u dynamic-dca -f
+source .venv/bin/activate
+pytest -v
 ```
 
-### Docker Deployment (Recommended for Production)
+If the venv doesn't exist yet:
 
-The easiest way to run this strategy is using Docker with automated Python-based scheduling.
-
-#### Quick Start
-
-1. **Clone and configure**:
-   ```bash
-   git clone <repository-url>
-   cd dynamic-dca
-   cp env.example .env
-   ```
-
-2. **Edit `.env` file** with your configuration:
-   ```bash
-   # Required: Add your Kraken API credentials
-   KRAKEN_API_KEY=your_actual_api_key
-   KRAKEN_PRIVATE_KEY=your_actual_private_key
-   
-   # Optional: Customize schedule (default: daily at 1 AM)
-   CRON_SCHEDULE=0 1 * * *
-   TZ=Europe/Prague
-   
-   # Optional: Customize trading parameters
-   BASE_ORDER_SIZE=10.0
-   MAX_MULTIPLICATOR=5.0
-   ```
-
-3. **Start the container**:
-   ```bash
-   docker-compose up -d
-   ```
-
-4. **Monitor logs**:
-   ```bash
-   docker-compose logs -f
-   ```
-
-#### Docker Configuration Options
-
-**Data Persistence:**
-All data files (ATH, logs, cumulative data) are stored in the `./data` directory and persist across container restarts.
-
-**Environment Variables:**
-- `CRON_SCHEDULE` - Cron expression for execution schedule (e.g., "0 1 * * *" for daily at 1 AM)
-- `TZ` - Timezone for scheduler execution
-- `DATA_VOLUME_PATH` - Local directory for data persistence
-- `BASE_ORDER_SIZE` - Base order size in EUR
-- `MAX_MULTIPLICATOR` - Maximum order size multiplier
-- `KRAKEN_API_KEY` - Your Kraken API key (required)
-- `KRAKEN_PRIVATE_KEY` - Your Kraken private key (required)
-- `TELEGRAM_BOT_TOKEN` - Telegram bot token (optional)
-- `TELEGRAM_CHAT_ID` - Telegram chat ID (optional)
-
-
-## Project Structure
-
-```
-dynamic-dca/
-├── src/                    # Source code
-│   ├── __init__.py        # Package initialization
-│   ├── config.py          # Configuration settings
-│   ├── dynamic_dca.py     # Main strategy implementation
-│   ├── scheduler.py       # Python scheduler (replaces cron)
-│   └── setup.py           # Initial setup script
-├── data/                  # Data files (persistent)
-│   ├── ath_price.txt      # All-time high price
-│   ├── cumulative_data.txt # Investment tracking
-│   └── dca_log.csv        # Execution history
-├── logs/                  # Log files
-│   └── dca_strategy.log   # Application logs
-├── requirements.txt       # Python dependencies
-├── Dockerfile             # Docker configuration
-├── docker-compose.yml     # Docker Compose setup
-└── README.md              # This file
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt pytest
 ```
 
-## Files Generated
-
-When running with Docker, all files are stored in the mounted `./data` directory:
-
-- `data/ATH` - Stores current All-Time High
-- `data/cumulative_data.log` - Stores cumulative investment and BTC amounts  
-- `data/dca_log.csv` - Complete execution history
-- `data/dca_strategy.log` - Application logs
+Tests mock all external services (Kraken API, Telegram) and use temporary directories for file state — no API keys or network access needed.
